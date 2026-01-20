@@ -4,92 +4,100 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --background: 240 20% 99%;
+    --foreground: 240 10% 10%;
 
-    --card: 40 33% 95%;
-    --card-foreground: 222 47% 11%;
+    --card: 45 40% 96%;
+    --card-foreground: 240 10% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 240 10% 10%;
 
-    --primary: 217 91% 60%;
+    --primary: 220 95% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 270 60% 67%;
+    --secondary: 265 85% 60%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
+    --muted: 240 15% 95%;
+    --muted-foreground: 240 5% 45%;
 
-    --accent: 338 82% 60%;
+    --accent: 340 90% 55%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 85% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 217 91% 60%;
+    --border: 240 10% 90%;
+    --input: 240 10% 90%;
+    --ring: 265 85% 60%;
 
     --radius: 0.75rem;
 
-    /* Custom gradient colors */
-    --gradient-blue: 212 80% 59%;
-    --gradient-purple: 263 74% 67%;
-    --gradient-pink: 338 82% 60%;
+    /* Vibrant gradient colors */
+    --gradient-blue: 215 100% 55%;
+    --gradient-purple: 265 95% 62%;
+    --gradient-pink: 340 95% 58%;
 
-    /* Cream card */
-    --cream: 40 33% 95%;
-    --cream-dark: 40 20% 90%;
+    /* Cream card - warmer and richer */
+    --cream: 42 45% 96%;
+    --cream-dark: 42 30% 90%;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-background: 0 0% 99%;
+    --sidebar-foreground: 240 10% 25%;
+    --sidebar-primary: 265 85% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 15% 96%;
+    --sidebar-accent-foreground: 240 10% 10%;
+    --sidebar-border: 240 10% 92%;
+    --sidebar-ring: 265 85% 60%;
   }
 
   .dark {
-    --background: 222 47% 6%;
+    --background: 240 15% 8%;
     --foreground: 0 0% 98%;
 
-    --card: 222 47% 8%;
+    --card: 240 15% 12%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 222 47% 8%;
+    --popover: 240 15% 10%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 217 91% 60%;
+    --primary: 220 100% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 270 60% 67%;
+    --secondary: 265 90% 65%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 220 14% 15%;
-    --muted-foreground: 220 9% 60%;
+    --muted: 240 10% 18%;
+    --muted-foreground: 240 5% 65%;
 
-    --accent: 338 82% 60%;
+    --accent: 340 95% 60%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62% 30%;
+    --destructive: 0 75% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 20%;
-    --input: 220 13% 20%;
-    --ring: 217 91% 60%;
+    --border: 240 10% 22%;
+    --input: 240 10% 22%;
+    --ring: 265 90% 65%;
 
-    --sidebar-background: 222 47% 8%;
+    /* Vibrant gradient colors for dark mode */
+    --gradient-blue: 215 100% 60%;
+    --gradient-purple: 265 95% 68%;
+    --gradient-pink: 340 95% 62%;
+
+    /* Dark cream card */
+    --cream-dark: 240 10% 25%;
+
+    --sidebar-background: 240 15% 10%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary: 265 90% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 14% 15%;
+    --sidebar-accent: 240 10% 18%;
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 220 13% 20%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-border: 240 10% 22%;
+    --sidebar-ring: 265 90% 65%;
   }
 }
 
