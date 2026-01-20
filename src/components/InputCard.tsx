@@ -1,6 +1,5 @@
-import { useState, KeyboardEvent } from "react";
+import { useState, KeyboardEvent, useRef, useEffect } from "react";
 import { Plus, Paperclip, Palette, MessageSquare, Mic, ArrowRight, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface InputCardProps {
   onSubmit: (prompt: string) => void;
@@ -9,6 +8,8 @@ interface InputCardProps {
 
 const InputCard = ({ onSubmit, isLoading }: InputCardProps) => {
   const [prompt, setPrompt] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSubmit = () => {
     if (prompt.trim() && !isLoading) {
@@ -23,23 +24,46 @@ const InputCard = ({ onSubmit, isLoading }: InputCardProps) => {
     }
   };
 
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+    }
+  }, [prompt]);
+
+  const toolbarButtons = [
+    { icon: Plus, label: "Add" },
+    { icon: Paperclip, label: "Attach" },
+    { icon: Palette, label: "Theme" },
+  ];
+
+  const rightButtons = [
+    { icon: MessageSquare, label: "Chat" },
+    { icon: Mic, label: "Voice" },
+  ];
+
   return (
-    <div 
-      className="w-full max-w-2xl mx-auto animate-float-slow"
-      style={{ animationDuration: '8s' }}
-    >
+    <div className="w-full max-w-2xl mx-auto">
       <div 
-        className="cream-card rounded-3xl shadow-card hover:shadow-card-hover transition-all duration-500 overflow-hidden"
+        className={`
+          cream-card rounded-3xl overflow-hidden
+          ${isFocused ? 'ring-2 ring-[hsl(var(--gradient-purple)/0.2)]' : ''}
+        `}
       >
         {/* Textarea */}
         <div className="p-6 pb-3">
           <textarea
+            ref={textareaRef}
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             onKeyDown={handleKeyDown}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             placeholder="Ask Lovable to create a project..."
-            className="w-full h-24 resize-none bg-transparent text-foreground placeholder:text-muted-foreground text-base leading-relaxed focus:outline-none"
+            className="w-full min-h-[96px] max-h-[200px] resize-none bg-transparent text-foreground placeholder:text-muted-foreground text-base leading-relaxed focus:outline-none transition-colors duration-300"
             disabled={isLoading}
+            style={{ height: "96px" }}
           />
         </div>
 
@@ -47,63 +71,60 @@ const InputCard = ({ onSubmit, isLoading }: InputCardProps) => {
         <div className="px-4 pb-4 flex items-center justify-between">
           {/* Left buttons */}
           <div className="flex items-center gap-1">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="w-9 h-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-cream-dark"
-            >
-              <Plus className="w-5 h-5" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="w-9 h-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-cream-dark"
-            >
-              <Paperclip className="w-5 h-5" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="w-9 h-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-cream-dark"
-            >
-              <Palette className="w-5 h-5" />
-            </Button>
+            {toolbarButtons.map(({ icon: Icon, label }) => (
+              <button
+                key={label}
+                className="input-toolbar-btn"
+                aria-label={label}
+                type="button"
+              >
+                <Icon className="w-5 h-5" />
+              </button>
+            ))}
           </div>
 
           {/* Right buttons */}
           <div className="flex items-center gap-1">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="w-9 h-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-cream-dark"
-            >
-              <MessageSquare className="w-5 h-5" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="w-9 h-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-cream-dark"
-            >
-              <Mic className="w-5 h-5" />
-            </Button>
-            <Button 
+            {rightButtons.map(({ icon: Icon, label }) => (
+              <button
+                key={label}
+                className="input-toolbar-btn"
+                aria-label={label}
+                type="button"
+              >
+                <Icon className="w-5 h-5" />
+              </button>
+            ))}
+            
+            {/* Submit button */}
+            <button 
               onClick={handleSubmit}
               disabled={!prompt.trim() || isLoading}
-              className="w-10 h-10 rounded-full bg-foreground text-background hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed ml-2"
+              className="submit-btn ml-2"
+              aria-label="Generate"
+              type="button"
             >
               {isLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-0.5" />
               )}
-            </Button>
+            </button>
           </div>
         </div>
 
         {/* Keyboard hint */}
         <div className="px-6 pb-4 text-center">
-          <span className="text-xs text-muted-foreground">
-            Press <kbd className="px-1.5 py-0.5 bg-cream-dark rounded text-xs font-mono">⌘</kbd> + <kbd className="px-1.5 py-0.5 bg-cream-dark rounded text-xs font-mono">Enter</kbd> to generate
+          <span className="text-xs text-muted-foreground opacity-70 transition-opacity duration-300 hover:opacity-100">
+            Press{" "}
+            <kbd className="px-1.5 py-0.5 bg-[hsl(var(--cream-dark))] rounded text-xs font-mono border border-[hsl(var(--border))]">
+              ⌘
+            </kbd>
+            {" + "}
+            <kbd className="px-1.5 py-0.5 bg-[hsl(var(--cream-dark))] rounded text-xs font-mono border border-[hsl(var(--border))]">
+              Enter
+            </kbd>
+            {" "}to generate
           </span>
         </div>
       </div>
