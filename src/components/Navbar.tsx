@@ -1,5 +1,6 @@
 import { Sparkles, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const Navbar = () => {
   const menuItems = [
@@ -35,7 +36,8 @@ const Navbar = () => {
           </div>
 
           {/* Right Side */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
             <Button 
               variant="ghost" 
               className="text-sm font-medium text-muted-foreground hover:text-foreground"

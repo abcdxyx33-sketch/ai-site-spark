@@ -98,6 +98,11 @@
     @apply border-border;
   }
 
+  html {
+    transition: background-color 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+                color 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
   }
@@ -189,7 +194,35 @@
   }
 
   .nav-blur {
-    @apply bg-white/70 backdrop-blur-xl border-b border-white/20;
+    @apply bg-background/70 backdrop-blur-xl border-b border-border/20;
+    transition: background-color 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .dark .cream-card {
+    @apply bg-[hsl(222,47%,12%)] border border-border/30;
+    box-shadow: 
+      0 0 0 1px hsl(220 13% 25% / 0.5),
+      0 4px 24px -4px rgba(0, 0, 0, 0.3),
+      0 8px 32px -8px rgba(0, 0, 0, 0.2);
+  }
+
+  .dark .cream-card:hover {
+    box-shadow: 
+      0 0 0 1px hsl(220 13% 30% / 0.6),
+      0 12px 40px -8px rgba(0, 0, 0, 0.4),
+      0 20px 50px -12px rgba(0, 0, 0, 0.3);
+  }
+
+  .dark .cream-card:focus-within {
+    box-shadow: 
+      0 0 0 2px hsl(var(--gradient-purple) / 0.4),
+      0 12px 40px -8px rgba(155, 111, 232, 0.2),
+      0 20px 50px -12px rgba(0, 0, 0, 0.3);
+  }
+
+  .dark .input-toolbar-btn:hover {
+    @apply bg-[hsl(220,13%,20%)];
   }
 }
 
