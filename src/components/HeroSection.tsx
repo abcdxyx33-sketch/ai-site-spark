@@ -14,8 +14,8 @@ const HeroSection = ({ onSubmit, isLoading }: HeroSectionProps) => {
           className="text-5xl sm:text-6xl md:text-7xl font-bold text-foreground tracking-tight animate-fade-in-up"
           style={{ animationDelay: '0s', animationFillMode: 'backwards' }}
         >
-          Build something{" "}
-          <span className="gradient-text">Webbuilder</span>
+          Builds Something{" "}
+          <span className="gradient-text">Creative</span>
         </h1>
         <p 
           className="text-xl md:text-2xl text-muted-foreground max-w-xl mx-auto animate-fade-in-up"
