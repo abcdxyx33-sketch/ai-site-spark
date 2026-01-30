@@ -15,7 +15,7 @@ const HeroSection = ({ onSubmit, isLoading }: HeroSectionProps) => {
           style={{ animationDelay: '0s', animationFillMode: 'backwards' }}
         >
           Build something{" "}
-          <span className="gradient-text">Lovable</span>
+          <span className="gradient-text">Webbuilder</span>
         </h1>
         <p 
           className="text-xl md:text-2xl text-muted-foreground max-w-xl mx-auto animate-fade-in-up"
