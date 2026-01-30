@@ -40,10 +40,10 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
-      console.error("[generate-website] LOVABLE_API_KEY is not configured");
+      console.error("[generate-website] ERR_CONFIG_001");
       return new Response(
-        JSON.stringify({ error: "Service configuration error. Please try again later." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Service temporarily unavailable. Please try again later." }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -80,25 +80,25 @@ The HTML should be complete and ready to render in a browser iframe.`;
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`[generate-website] AI gateway error: ${response.status} - ${errorText}`);
+      // Log only error code, not full response details
+      console.error(`[generate-website] ERR_GATEWAY_${response.status}`);
       
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: "Service temporarily busy. Please try again in a moment." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
       if (response.status === 402) {
         return new Response(
-          JSON.stringify({ error: "Service limit reached. Please try again later." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({ error: "Service temporarily unavailable. Please try again later." }),
+          { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
       
       return new Response(
         JSON.stringify({ error: "Unable to generate website. Please try again." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -122,10 +122,10 @@ The HTML should be complete and ready to render in a browser iframe.`;
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
-    console.error("[generate-website] Unexpected error:", error);
+    console.error("[generate-website] ERR_UNEXPECTED");
     return new Response(
       JSON.stringify({ error: "An unexpected error occurred. Please try again." }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });
