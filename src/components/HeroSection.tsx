@@ -7,18 +7,18 @@ interface HeroSectionProps {
 
 const HeroSection = ({ onSubmit, isLoading }: HeroSectionProps) => {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-12">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 pt-20 sm:pt-24 pb-8 sm:pb-12">
       {/* Hero content */}
-      <div className="text-center mb-12 space-y-6">
+      <div className="text-center mb-8 sm:mb-12 space-y-4 sm:space-y-6">
         <h1 
-          className="text-5xl sm:text-6xl md:text-7xl font-bold text-foreground tracking-tight animate-fade-in-up"
+          className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground tracking-tight animate-fade-in-up leading-tight"
           style={{ animationDelay: '0s', animationFillMode: 'backwards' }}
         >
           Builds Something{" "}
           <span className="gradient-text">Creative</span>
         </h1>
         <p 
-          className="text-xl md:text-2xl text-muted-foreground max-w-xl mx-auto animate-fade-in-up"
+          className="text-base sm:text-xl md:text-2xl text-muted-foreground max-w-md sm:max-w-xl mx-auto animate-fade-in-up px-2"
           style={{ animationDelay: '0.1s', animationFillMode: 'backwards' }}
         >
           Create apps and websites by chatting with AI
