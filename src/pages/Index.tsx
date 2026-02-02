@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import BackgroundGradient from "@/components/BackgroundGradient";
 import SplashScreen from "@/components/SplashScreen";
 import Navbar from "@/components/Navbar";
@@ -8,11 +8,23 @@ import ErrorNotification from "@/components/ErrorNotification";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+const STORAGE_KEY = "generated-website-code";
+
 const Index = () => {
   const [showSplash, setShowSplash] = useState(true);
-  const [generatedCode, setGeneratedCode] = useState<string | null>(null);
+  const [generatedCode, setGeneratedCode] = useState<string | null>(() => {
+    // Load saved code from localStorage on initial render
+    return localStorage.getItem(STORAGE_KEY);
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Save code to localStorage whenever it changes
+  useEffect(() => {
+    if (generatedCode) {
+      localStorage.setItem(STORAGE_KEY, generatedCode);
+    }
+  }, [generatedCode]);
 
   // Handle splash completion
   const handleSplashComplete = () => {
@@ -53,6 +65,7 @@ const Index = () => {
   };
 
   const handleNewProject = () => {
+    localStorage.removeItem(STORAGE_KEY);
     setGeneratedCode(null);
     setError(null);
   };
