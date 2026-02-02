@@ -1,10 +1,14 @@
 import { useState } from "react";
-import { Sparkles, ChevronDown, Menu, X } from "lucide-react";
+import { Sparkles, ChevronDown, Menu, X, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
   
   const menuItems = [
     { label: "Solutions", hasDropdown: true },
@@ -12,6 +16,18 @@ const Navbar = () => {
     { label: "Pricing", hasDropdown: false },
     { label: "Community", hasDropdown: true },
   ];
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast.success("Signed out successfully");
+    } catch {
+      toast.error("Failed to sign out");
+    }
+  };
+
+  const userInitials = user?.email?.charAt(0).toUpperCase() || "U";
+  const userAvatar = user?.user_metadata?.avatar_url;
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-40 nav-blur">
@@ -39,23 +55,34 @@ const Navbar = () => {
           </div>
 
           {/* Right Side */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 sm:gap-3">
             <ThemeToggle />
             
-            {/* Desktop buttons */}
-            <div className="hidden sm:flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                className="text-sm font-medium text-muted-foreground hover:text-foreground"
-              >
-                Log in
-              </Button>
-              <Button 
-                className="bg-foreground text-background hover:bg-foreground/90 text-sm font-medium px-4 sm:px-5 rounded-full"
-              >
-                Get started
-              </Button>
-            </div>
+            {/* User Info - Desktop */}
+            {user && (
+              <div className="hidden sm:flex items-center gap-2 sm:gap-3">
+                <div className="flex items-center gap-2">
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage src={userAvatar} alt={user.email || "User"} />
+                    <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                      {userInitials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm font-medium text-foreground hidden md:block max-w-[150px] truncate">
+                    {user.email}
+                  </span>
+                </div>
+                <Button
+                  onClick={handleSignOut}
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1.5 text-muted-foreground hover:text-foreground"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden md:inline">Sign out</span>
+                </Button>
+              </div>
+            )}
             
             {/* Mobile menu button */}
             <Button
@@ -88,20 +115,30 @@ const Navbar = () => {
                 </button>
               ))}
               
-              {/* Mobile auth buttons */}
-              <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-border/30 sm:hidden">
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-center text-sm font-medium text-muted-foreground hover:text-foreground"
-                >
-                  Log in
-                </Button>
-                <Button 
-                  className="w-full bg-foreground text-background hover:bg-foreground/90 text-sm font-medium rounded-full"
-                >
-                  Get started
-                </Button>
-              </div>
+              {/* Mobile user info and sign out */}
+              {user && (
+                <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-border/30">
+                  <div className="flex items-center gap-3 px-4 py-2">
+                    <Avatar className="w-8 h-8">
+                      <AvatarImage src={userAvatar} alt={user.email || "User"} />
+                      <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                        {userInitials}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm font-medium text-foreground truncate">
+                      {user.email}
+                    </span>
+                  </div>
+                  <Button 
+                    onClick={handleSignOut}
+                    variant="ghost" 
+                    className="w-full justify-start gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Sign out
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         )}
