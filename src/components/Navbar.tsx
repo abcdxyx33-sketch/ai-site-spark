@@ -1,5 +1,6 @@
 import { useState, ReactNode } from "react";
-import { Sparkles, ChevronDown, Menu, X, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Sparkles, ChevronDown, Menu, X, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -11,6 +12,7 @@ interface NavbarProps {
 }
 
 const Navbar = ({ children }: NavbarProps) => {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
   
@@ -72,25 +74,30 @@ const Navbar = ({ children }: NavbarProps) => {
             {/* User Info - Desktop */}
             {user && (
               <div className="hidden sm:flex items-center gap-2 sm:gap-3">
-                <div className="flex items-center gap-2">
-                  <Avatar className="w-8 h-8">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate("/profile")}
+                  className="gap-2"
+                >
+                  <Avatar className="w-7 h-7">
                     <AvatarImage src={userAvatar} alt={user.email || "User"} />
                     <AvatarFallback className="bg-primary text-primary-foreground text-xs">
                       {userInitials}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="text-sm font-medium text-foreground hidden md:block max-w-[150px] truncate">
-                    {user.email}
+                  <span className="text-sm font-medium text-foreground hidden md:block max-w-[120px] truncate">
+                    {user.user_metadata?.full_name || user.email}
                   </span>
-                </div>
+                </Button>
                 <Button
                   onClick={handleSignOut}
                   variant="ghost"
-                  size="sm"
-                  className="gap-1.5 text-muted-foreground hover:text-foreground"
+                  size="icon"
+                  className="w-8 h-8 text-muted-foreground hover:text-foreground"
+                  title="Sign out"
                 >
                   <LogOut className="w-4 h-4" />
-                  <span className="hidden md:inline">Sign out</span>
                 </Button>
               </div>
             )}
@@ -126,20 +133,28 @@ const Navbar = ({ children }: NavbarProps) => {
                 </button>
               ))}
               
-              {/* Mobile user info and sign out */}
               {user && (
                 <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-border/30">
-                  <div className="flex items-center gap-3 px-4 py-2">
+                  <Button
+                    variant="ghost"
+                    onClick={() => { navigate("/profile"); setIsMenuOpen(false); }}
+                    className="w-full justify-start gap-3 py-3"
+                  >
                     <Avatar className="w-8 h-8">
                       <AvatarImage src={userAvatar} alt={user.email || "User"} />
                       <AvatarFallback className="bg-primary text-primary-foreground text-xs">
                         {userInitials}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="text-sm font-medium text-foreground truncate">
-                      {user.email}
-                    </span>
-                  </div>
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm font-medium text-foreground">
+                        {user.user_metadata?.full_name || "Profile"}
+                      </span>
+                      <span className="text-xs text-muted-foreground truncate max-w-[180px]">
+                        {user.email}
+                      </span>
+                    </div>
+                  </Button>
                   <Button 
                     onClick={handleSignOut}
                     variant="ghost" 
