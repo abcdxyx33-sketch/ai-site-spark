@@ -5,22 +5,33 @@ import SplashScreen from "@/components/SplashScreen";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import Workspace from "@/components/Workspace";
+import ProjectSelector from "@/components/ProjectSelector";
 import ErrorNotification from "@/components/ErrorNotification";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useUserProject } from "@/hooks/useUserProject";
+import { useUserProjects } from "@/hooks/useUserProjects";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
-  const { project, isLoading: projectLoading, saveProject, deleteProject } = useUserProject();
+  const { 
+    projects, 
+    currentProject, 
+    currentProjectId,
+    isLoading: projectLoading, 
+    createProject, 
+    updateProject,
+    deleteProject,
+    selectProject,
+    startNewProject 
+  } = useUserProjects();
   
   const [showSplash, setShowSplash] = useState(true);
-  const [generatedCode, setGeneratedCode] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
 
   // Redirect to auth if not logged in
   useEffect(() => {
@@ -28,13 +39,6 @@ const Index = () => {
       navigate("/auth", { replace: true });
     }
   }, [authLoading, user, navigate]);
-
-  // Load project data when available
-  useEffect(() => {
-    if (project?.html_code) {
-      setGeneratedCode(project.html_code);
-    }
-  }, [project]);
 
   // Handle splash completion
   const handleSplashComplete = () => {
@@ -60,9 +64,9 @@ const Index = () => {
       }
 
       if (data?.html) {
-        setGeneratedCode(data.html);
-        // Save to database
-        await saveProject(data.html, prompt);
+        // Create a new project with the generated code
+        await createProject(data.html, prompt);
+        setIsCreatingNew(false);
         toast.success("Website generated successfully!");
       } else {
         throw new Error("No HTML received from AI");
@@ -76,24 +80,34 @@ const Index = () => {
     }
   };
 
-  const handleNewProject = async () => {
+  const handleNewProject = () => {
+    setIsCreatingNew(true);
+    startNewProject();
+    setError(null);
+  };
+
+  const handleCodeChange = async (newCode: string) => {
+    if (currentProjectId) {
+      try {
+        await updateProject(currentProjectId, newCode);
+      } catch {
+        // Error already handled in hook
+      }
+    }
+  };
+
+  const handleDeleteProject = async (projectId: string) => {
     try {
-      await deleteProject();
-      setGeneratedCode(null);
-      setError(null);
-      toast.success("Started a new project!");
+      await deleteProject(projectId);
+      toast.success("Project deleted!");
     } catch {
       // Error already handled in hook
     }
   };
 
-  const handleCodeChange = async (newCode: string) => {
-    setGeneratedCode(newCode);
-    try {
-      await saveProject(newCode);
-    } catch {
-      // Error already handled in hook
-    }
+  const handleSelectProject = (projectId: string) => {
+    setIsCreatingNew(false);
+    selectProject(projectId);
   };
 
   // Show loading while checking auth
@@ -114,12 +128,25 @@ const Index = () => {
     return <SplashScreen onComplete={handleSplashComplete} />;
   }
 
+  // Determine what to show: workspace with current project or hero section for new project
+  const showWorkspace = currentProject && !isCreatingNew;
+
   return (
     <div className="relative min-h-screen grain-overlay">
       <BackgroundGradient />
       
       <div className="relative z-10">
-        <Navbar />
+        <Navbar>
+          {projects.length > 0 && (
+            <ProjectSelector
+              projects={projects}
+              currentProjectId={isCreatingNew ? null : currentProjectId}
+              onSelect={handleSelectProject}
+              onNew={handleNewProject}
+              onDelete={handleDeleteProject}
+            />
+          )}
+        </Navbar>
         
         {error && (
           <ErrorNotification 
@@ -128,9 +155,9 @@ const Index = () => {
           />
         )}
 
-        {generatedCode ? (
+        {showWorkspace ? (
           <Workspace 
-            code={generatedCode} 
+            code={currentProject.html_code} 
             onCodeChange={handleCodeChange}
             onNewProject={handleNewProject}
           />

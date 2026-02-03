@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, ReactNode } from "react";
 import { Sparkles, ChevronDown, Menu, X, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -6,7 +6,11 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
-const Navbar = () => {
+interface NavbarProps {
+  children?: ReactNode;
+}
+
+const Navbar = ({ children }: NavbarProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
   
@@ -40,6 +44,13 @@ const Navbar = () => {
             </div>
             <span className="text-lg sm:text-xl font-semibold text-foreground">Webbuilder</span>
           </div>
+
+          {/* Project Selector (passed as children) */}
+          {children && (
+            <div className="hidden sm:flex items-center">
+              {children}
+            </div>
+          )}
 
           {/* Desktop Menu Items */}
           <div className="hidden lg:flex items-center gap-1">
