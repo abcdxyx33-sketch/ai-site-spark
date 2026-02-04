@@ -1,19 +1,29 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Sparkles, Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
 import BackgroundGradient from "@/components/BackgroundGradient";
+import { z } from "zod";
+
+const emailSchema = z.string().email("Please enter a valid email address");
+const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
 
 const Auth = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
   useEffect(() => {
-    // Check if user is already logged in
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (session) {
@@ -33,6 +43,23 @@ const Auth = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  const validateForm = (): boolean => {
+    const newErrors: { email?: string; password?: string } = {};
+    
+    const emailResult = emailSchema.safeParse(email);
+    if (!emailResult.success) {
+      newErrors.email = emailResult.error.errors[0].message;
+    }
+    
+    const passwordResult = passwordSchema.safeParse(password);
+    if (!passwordResult.success) {
+      newErrors.password = passwordResult.error.errors[0].message;
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
@@ -43,7 +70,56 @@ const Auth = () => {
       if (error) {
         toast.error(error.message || "Failed to sign in with Google");
       }
-    } catch (err) {
+    } catch {
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
+    
+    setIsLoading(true);
+    try {
+      if (isSignUp) {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: window.location.origin,
+          },
+        });
+        
+        if (error) {
+          if (error.message.includes("already registered")) {
+            toast.error("This email is already registered. Please sign in instead.");
+            setIsSignUp(false);
+          } else {
+            toast.error(error.message);
+          }
+        } else {
+          toast.success("Check your email to confirm your account!");
+        }
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        
+        if (error) {
+          if (error.message.includes("Invalid login credentials")) {
+            toast.error("Invalid email or password. Please try again.");
+          } else if (error.message.includes("Email not confirmed")) {
+            toast.error("Please confirm your email before signing in.");
+          } else {
+            toast.error(error.message);
+          }
+        }
+      }
+    } catch {
       toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
@@ -67,21 +143,102 @@ const Auth = () => {
           className="bg-card/80 backdrop-blur-xl border border-border/50 rounded-2xl p-8 shadow-2xl animate-fade-in-up"
         >
           {/* Logo */}
-          <div className="flex flex-col items-center mb-8">
+          <div className="flex flex-col items-center mb-6">
             <div className="w-16 h-16 rounded-2xl gradient-bg flex items-center justify-center mb-4 shadow-glow">
               <Sparkles className="w-8 h-8 text-white" strokeWidth={1.5} />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">Welcome to AI Builder</h1>
+            <h1 className="text-2xl font-bold text-foreground">
+              {isSignUp ? "Create Account" : "Welcome Back"}
+            </h1>
             <p className="text-muted-foreground text-center mt-2">
-              Sign in to create and save your AI-generated websites
+              {isSignUp 
+                ? "Sign up to create and save your AI-generated websites" 
+                : "Sign in to access your AI-generated websites"}
             </p>
+          </div>
+
+          {/* Email/Password Form */}
+          <form onSubmit={handleEmailAuth} className="space-y-4 mb-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (errors.email) setErrors(prev => ({ ...prev, email: undefined }));
+                  }}
+                  className="pl-10"
+                  disabled={isLoading}
+                />
+              </div>
+              {errors.email && (
+                <p className="text-sm text-destructive">{errors.email}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (errors.password) setErrors(prev => ({ ...prev, password: undefined }));
+                  }}
+                  className="pl-10 pr-10"
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="text-sm text-destructive">{errors.password}</p>
+              )}
+            </div>
+
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full h-11 gap-2 rounded-xl"
+            >
+              {isLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : null}
+              {isSignUp ? "Create Account" : "Sign In"}
+            </Button>
+          </form>
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+            </div>
           </div>
 
           {/* Google Sign In Button */}
           <Button
+            type="button"
             onClick={handleGoogleSignIn}
             disabled={isLoading}
-            className="w-full h-12 gap-3 rounded-xl text-base font-medium bg-foreground text-background hover:bg-foreground/90"
+            variant="outline"
+            className="w-full h-11 gap-3 rounded-xl"
           >
             {isLoading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -105,11 +262,27 @@ const Auth = () => {
                 />
               </svg>
             )}
-            {isLoading ? "Signing in..." : "Continue with Google"}
+            Continue with Google
           </Button>
 
+          {/* Toggle Sign Up / Sign In */}
+          <p className="text-sm text-muted-foreground text-center mt-6">
+            {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+            <button
+              type="button"
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setErrors({});
+              }}
+              className="text-primary hover:underline font-medium"
+              disabled={isLoading}
+            >
+              {isSignUp ? "Sign in" : "Sign up"}
+            </button>
+          </p>
+
           {/* Terms */}
-          <p className="text-xs text-muted-foreground text-center mt-6">
+          <p className="text-xs text-muted-foreground text-center mt-4">
             By signing in, you agree to our Terms of Service and Privacy Policy
           </p>
         </div>

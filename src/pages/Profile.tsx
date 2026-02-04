@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Mail, Calendar, Trash2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   AlertDialog,
@@ -15,8 +14,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import BackgroundGradient from "@/components/BackgroundGradient";
+import AvatarGenerator from "@/components/AvatarGenerator";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserProjects, UserProject } from "@/hooks/useUserProjects";
+import { useProfile } from "@/hooks/useProfile";
 import { formatDistanceToNow, format } from "date-fns";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -26,6 +27,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
   const { projects, isLoading: projectsLoading, deleteProject, selectProject } = useUserProjects();
+  const { isGeneratingAvatar, generateAvatar, uploadAvatar, getAvatarUrl } = useProfile();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -69,7 +71,7 @@ const Profile = () => {
   }
 
   const userInitials = user.email?.charAt(0).toUpperCase() || "U";
-  const userAvatar = user.user_metadata?.avatar_url;
+  const userAvatar = getAvatarUrl();
   const createdAt = user.created_at ? new Date(user.created_at) : null;
 
   return (
@@ -92,13 +94,14 @@ const Profile = () => {
           {/* Profile Header */}
           <Card className="mb-8">
             <CardHeader>
-              <div className="flex items-center gap-4">
-                <Avatar className="w-16 h-16">
-                  <AvatarImage src={userAvatar} alt={user.email || "User"} />
-                  <AvatarFallback className="bg-primary text-primary-foreground text-xl">
-                    {userInitials}
-                  </AvatarFallback>
-                </Avatar>
+              <div className="flex items-center gap-6">
+                <AvatarGenerator
+                  currentAvatar={userAvatar}
+                  userInitials={userInitials}
+                  onGenerateAvatar={generateAvatar}
+                  onUploadAvatar={uploadAvatar}
+                  isGenerating={isGeneratingAvatar}
+                />
                 <div>
                   <CardTitle className="text-2xl">{user.user_metadata?.full_name || "User"}</CardTitle>
                   <CardDescription className="flex items-center gap-2 mt-1">
@@ -111,6 +114,9 @@ const Profile = () => {
                       Joined {format(createdAt, "MMMM yyyy")}
                     </CardDescription>
                   )}
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Click avatar to change or generate with AI
+                  </p>
                 </div>
               </div>
             </CardHeader>

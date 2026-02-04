@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_projects: {
         Row: {
           created_at: string
@@ -21,6 +45,7 @@ export type Database = {
           id: string
           prompt: string | null
           updated_at: string
+          user_avatar_url: string | null
           user_id: string
         }
         Insert: {
@@ -29,6 +54,7 @@ export type Database = {
           id?: string
           prompt?: string | null
           updated_at?: string
+          user_avatar_url?: string | null
           user_id: string
         }
         Update: {
@@ -37,6 +63,7 @@ export type Database = {
           id?: string
           prompt?: string | null
           updated_at?: string
+          user_avatar_url?: string | null
           user_id?: string
         }
         Relationships: []
