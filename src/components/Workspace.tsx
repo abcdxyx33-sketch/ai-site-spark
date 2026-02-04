@@ -212,7 +212,7 @@ const Workspace = ({ code, onCodeChange, onNewProject }: WorkspaceProps) => {
               <iframe
                 srcDoc={code}
                 className="w-full h-full border-0"
-                sandbox="allow-scripts"
+                sandbox=""
                 title="Preview"
               />
             </div>
