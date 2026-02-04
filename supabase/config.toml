@@ -1,1 +1,7 @@
 project_id = "rlodbxuxntqmttwfrnik"
+
+[functions.generate-website]
+verify_jwt = false
+
+[functions.generate-avatar]
+verify_jwt = false
