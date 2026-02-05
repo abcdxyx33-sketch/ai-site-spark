@@ -51,13 +51,31 @@ const Index = () => {
     setError(null);
 
     try {
-      const { data, error: fnError } = await supabase.functions.invoke('generate-website', {
-        body: { prompt },
-      });
+      // Use fetch with AbortController for longer timeout (60s)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
+      
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-website`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ prompt }),
+          signal: controller.signal,
+        }
+      );
+      
+      clearTimeout(timeoutId);
 
-      if (fnError) {
-        throw new Error(fnError.message);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Request failed with status ${response.status}`);
       }
+
+      const data = await response.json();
 
       if (data?.error) {
         throw new Error(data.error);
@@ -72,7 +90,14 @@ const Index = () => {
         throw new Error("No HTML received from AI");
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to generate website. Please try again.";
+      let message = "Failed to generate website. Please try again.";
+      if (err instanceof Error) {
+        if (err.name === 'AbortError') {
+          message = "Generation is taking longer than expected. Please try with a simpler prompt.";
+        } else {
+          message = err.message;
+        }
+      }
       setError(message);
       toast.error(message);
     } finally {
