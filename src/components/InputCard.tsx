@@ -1,21 +1,51 @@
 import { useState, KeyboardEvent, useRef, useEffect } from "react";
-import { Plus, Paperclip, Palette, MessageSquare, Mic, ArrowRight, Loader2 } from "lucide-react";
+ import { Plus, Paperclip, Mic, ArrowRight, Loader2, Image, FileText, Link2, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+ import FileUploadDialog from "./FileUploadDialog";
+ import VoiceAssistant from "./VoiceAssistant";
+ import { Badge } from "@/components/ui/badge";
 
 interface InputCardProps {
   onSubmit: (prompt: string) => void;
   isLoading: boolean;
 }
 
+ interface Reference {
+   type: "image" | "pdf" | "url";
+   content: string;
+   usage: "inspiration" | "include";
+ }
+ 
 const InputCard = ({ onSubmit, isLoading }: InputCardProps) => {
   const [prompt, setPrompt] = useState("");
   const [isFocused, setIsFocused] = useState(false);
+   const [showFileDialog, setShowFileDialog] = useState(false);
+   const [showVoiceAssistant, setShowVoiceAssistant] = useState(false);
+   const [references, setReferences] = useState<Reference[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isMobile = useIsMobile();
 
   const handleSubmit = () => {
     if (prompt.trim() && !isLoading) {
-      onSubmit(prompt.trim());
+       // Build the full prompt with references
+       let fullPrompt = prompt.trim();
+       
+       references.forEach((ref) => {
+         if (ref.type === "image") {
+           if (ref.usage === "inspiration") {
+             fullPrompt += `\n\n[Reference Image for Design Inspiration - use similar style, colors, and layout]`;
+           } else {
+             fullPrompt += `\n\n[Include this image in the website: ${ref.content}]`;
+           }
+         } else if (ref.type === "pdf") {
+           fullPrompt += `\n\n[PDF Reference for Design: ${ref.content}]`;
+         } else if (ref.type === "url") {
+           fullPrompt += `\n\n[Reference Website for Inspiration: ${ref.content}]`;
+         }
+       });
+       
+       onSubmit(fullPrompt);
+       setReferences([]);
     }
   };
 
@@ -34,25 +64,72 @@ const InputCard = ({ onSubmit, isLoading }: InputCardProps) => {
     }
   }, [prompt]);
 
-  const toolbarButtons = [
-    { icon: Plus, label: "Add" },
-    { icon: Paperclip, label: "Attach" },
-    { icon: Palette, label: "Theme" },
-  ];
-
-  const rightButtons = [
-    { icon: MessageSquare, label: "Chat" },
-    { icon: Mic, label: "Voice" },
-  ];
+   const handleFileProcessed = (data: Reference) => {
+     setReferences((prev) => [...prev, data]);
+   };
+ 
+   const handleRemoveReference = (index: number) => {
+     setReferences((prev) => prev.filter((_, i) => i !== index));
+   };
+ 
+   const handleVoiceGenerate = (voicePrompt: string) => {
+     setShowVoiceAssistant(false);
+     onSubmit(voicePrompt);
+   };
+ 
+   const getReferenceIcon = (type: string) => {
+     switch (type) {
+       case "image":
+         return Image;
+       case "pdf":
+         return FileText;
+       case "url":
+         return Link2;
+       default:
+         return Paperclip;
+     }
+   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-2 sm:px-0">
+     <>
+       <div className="w-full max-w-2xl mx-auto px-2 sm:px-0">
       <div 
         className={`
           cream-card rounded-2xl sm:rounded-3xl overflow-hidden
           ${isFocused ? 'ring-2 ring-[hsl(var(--gradient-purple)/0.2)]' : ''}
         `}
       >
+           {/* References Preview */}
+           {references.length > 0 && (
+             <div className="px-4 sm:px-6 pt-4 flex flex-wrap gap-2">
+               {references.map((ref, index) => {
+                 const Icon = getReferenceIcon(ref.type);
+                 return (
+                   <Badge
+                     key={index}
+                     variant="secondary"
+                     className="flex items-center gap-1.5 py-1.5 px-3 bg-muted/80"
+                   >
+                     <Icon className="w-3.5 h-3.5" />
+                     <span className="text-xs max-w-[100px] truncate">
+                       {ref.type === "url"
+                         ? new URL(ref.content).hostname
+                         : ref.type === "image"
+                         ? `Image (${ref.usage})`
+                         : ref.content}
+                     </span>
+                     <button
+                       onClick={() => handleRemoveReference(index)}
+                       className="ml-1 hover:text-destructive transition-colors"
+                     >
+                       <X className="w-3 h-3" />
+                     </button>
+                   </Badge>
+                 );
+               })}
+             </div>
+           )}
+ 
         {/* Textarea */}
         <div className="p-4 sm:p-6 pb-2 sm:pb-3">
           <textarea
@@ -73,30 +150,37 @@ const InputCard = ({ onSubmit, isLoading }: InputCardProps) => {
         <div className="px-3 sm:px-4 pb-3 sm:pb-4 flex items-center justify-between">
           {/* Left buttons - hide some on mobile */}
           <div className="flex items-center gap-0.5 sm:gap-1">
-            {toolbarButtons.slice(0, isMobile ? 2 : 3).map(({ icon: Icon, label }) => (
-              <button
-                key={label}
-                className="input-toolbar-btn w-8 h-8 sm:w-9 sm:h-9"
-                aria-label={label}
-                type="button"
-              >
-                <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
-            ))}
+               <button
+                 onClick={() => setShowFileDialog(true)}
+                 className="input-toolbar-btn w-8 h-8 sm:w-9 sm:h-9"
+                 aria-label="Add files"
+                 type="button"
+                 title="Add image, PDF, or URL reference"
+               >
+                 <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+               </button>
+               <button
+                 onClick={() => setShowFileDialog(true)}
+                 className="input-toolbar-btn w-8 h-8 sm:w-9 sm:h-9"
+                 aria-label="Attach file"
+                 type="button"
+                 title="Upload reference file"
+               >
+                 <Paperclip className="w-4 h-4 sm:w-5 sm:h-5" />
+               </button>
           </div>
 
           {/* Right buttons - hide chat on mobile */}
           <div className="flex items-center gap-0.5 sm:gap-1">
-            {rightButtons.slice(0, isMobile ? 1 : 2).map(({ icon: Icon, label }) => (
-              <button
-                key={label}
-                className="input-toolbar-btn w-8 h-8 sm:w-9 sm:h-9"
-                aria-label={label}
-                type="button"
-              >
-                <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
-            ))}
+               <button
+                 onClick={() => setShowVoiceAssistant(true)}
+                 className="input-toolbar-btn w-8 h-8 sm:w-9 sm:h-9"
+                 aria-label="Voice assistant"
+                 type="button"
+                 title="Talk to AI assistant"
+               >
+                 <Mic className="w-4 h-4 sm:w-5 sm:h-5" />
+               </button>
             
             {/* Submit button */}
             <button 
@@ -131,6 +215,22 @@ const InputCard = ({ onSubmit, isLoading }: InputCardProps) => {
         </div>
       </div>
     </div>
+       
+       {/* Dialogs */}
+       {showFileDialog && (
+         <FileUploadDialog
+           onClose={() => setShowFileDialog(false)}
+           onFileProcessed={handleFileProcessed}
+         />
+       )}
+       
+       {showVoiceAssistant && (
+         <VoiceAssistant
+           onReadyToGenerate={handleVoiceGenerate}
+           onClose={() => setShowVoiceAssistant(false)}
+         />
+       )}
+     </>
   );
 };
 
