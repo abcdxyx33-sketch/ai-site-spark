@@ -5,6 +5,9 @@ verify_jwt = false
 
 [functions.generate-avatar]
 verify_jwt = false
- 
- [functions.voice-chat]
- verify_jwt = false
+
+[functions.voice-chat]
+verify_jwt = false
+
+[functions.enhance-prompt]
+verify_jwt = false

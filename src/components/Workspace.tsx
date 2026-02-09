@@ -1,16 +1,19 @@
 import { useState, useEffect } from "react";
-import { Copy, Download, Edit3, Save, Plus, Check, Code, Eye } from "lucide-react";
+import { Copy, Download, Edit3, Save, Plus, Check, Code, Eye, RefreshCw, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface WorkspaceProps {
   code: string;
+  prompt: string | null;
   onCodeChange: (code: string) => void;
   onNewProject: () => void;
+  onRegenerateUI: (prompt: string) => void;
+  isRegenerating: boolean;
 }
 
-const Workspace = ({ code, onCodeChange, onNewProject }: WorkspaceProps) => {
+const Workspace = ({ code, prompt, onCodeChange, onNewProject, onRegenerateUI, isRegenerating }: WorkspaceProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedCode, setEditedCode] = useState(code);
   const [copied, setCopied] = useState(false);
@@ -46,6 +49,12 @@ const Workspace = ({ code, onCodeChange, onNewProject }: WorkspaceProps) => {
     toast({ description: "Changes saved!" });
   };
 
+  const handleRegenerateUI = () => {
+    if (!prompt) return;
+    const regeneratePrompt = `${prompt}\n\n[IMPORTANT: Generate a COMPLETELY DIFFERENT design and layout. Use different colors, different section arrangements, different typography, and a fresh visual approach. Make it look entirely new while keeping the same content purpose.]`;
+    onRegenerateUI(regeneratePrompt);
+  };
+
   const characterCount = code.length.toLocaleString();
 
   return (
@@ -67,6 +76,28 @@ const Workspace = ({ code, onCodeChange, onNewProject }: WorkspaceProps) => {
               <span className="hidden xs:inline">New Project</span>
               <span className="xs:hidden">New</span>
             </Button>
+
+            {/* New UI Button */}
+            {prompt && (
+              <Button
+                onClick={handleRegenerateUI}
+                disabled={isRegenerating}
+                variant="outline"
+                size={isMobile ? "sm" : "default"}
+                className="gap-2 rounded-full border-primary/30 hover:bg-primary/5 hover:border-primary/50 text-primary"
+              >
+                {isRegenerating ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4" />
+                )}
+                <span className="hidden xs:inline">New UI</span>
+                <span className="xs:hidden">
+                  {isRegenerating ? "" : "UI"}
+                </span>
+              </Button>
+            )}
+
             <span className="text-xs sm:text-sm text-muted-foreground">
               {characterCount} chars
             </span>
@@ -142,14 +173,13 @@ const Workspace = ({ code, onCodeChange, onNewProject }: WorkspaceProps) => {
 
         {/* Panels */}
         <div className={`grid gap-4 sm:gap-6 ${isMobile ? 'grid-cols-1' : 'lg:grid-cols-2'}`}>
-          {/* Code Panel - Hide on mobile when preview is active */}
+          {/* Code Panel */}
           <div 
             className={`rounded-xl sm:rounded-2xl overflow-hidden shadow-card animate-slide-up bg-[hsl(222_47%_11%)] ${
               isMobile && activeTab !== 'code' ? 'hidden' : ''
             }`}
             style={{ animationDelay: '0.1s' }}
           >
-            {/* Header */}
             <div 
               className="px-4 sm:px-6 py-3 sm:py-4"
               style={{
@@ -166,7 +196,6 @@ const Workspace = ({ code, onCodeChange, onNewProject }: WorkspaceProps) => {
               </h3>
             </div>
 
-            {/* Code editor */}
             <div className="p-3 sm:p-4 h-[350px] sm:h-[500px] overflow-auto">
               {isEditing ? (
                 <textarea
@@ -183,14 +212,13 @@ const Workspace = ({ code, onCodeChange, onNewProject }: WorkspaceProps) => {
             </div>
           </div>
 
-          {/* Preview Panel - Hide on mobile when code is active */}
+          {/* Preview Panel */}
           <div 
             className={`rounded-xl sm:rounded-2xl overflow-hidden shadow-card animate-slide-up bg-white ${
               isMobile && activeTab !== 'preview' ? 'hidden' : ''
             }`}
             style={{ animationDelay: '0.2s' }}
           >
-            {/* Header */}
             <div 
               className="px-4 sm:px-6 py-3 sm:py-4"
               style={{
@@ -207,8 +235,15 @@ const Workspace = ({ code, onCodeChange, onNewProject }: WorkspaceProps) => {
               </h3>
             </div>
 
-            {/* Preview iframe */}
-            <div className="h-[350px] sm:h-[500px] bg-white">
+            <div className="h-[350px] sm:h-[500px] bg-white relative">
+              {isRegenerating && (
+                <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                    <p className="text-sm text-muted-foreground font-medium">Generating new design...</p>
+                  </div>
+                </div>
+              )}
               <iframe
                 srcDoc={code}
                 className="w-full h-full border-0"
