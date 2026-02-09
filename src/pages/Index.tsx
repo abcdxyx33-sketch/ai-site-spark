@@ -88,10 +88,16 @@ const Index = () => {
       }
 
       if (data?.html) {
-        // Create a new project with the generated code
-        await createProject(data.html, prompt);
-        setIsCreatingNew(false);
-        toast.success("Website generated successfully!");
+        if (currentProjectId && !isCreatingNew) {
+          // Regenerating UI for existing project — update it
+          await updateProject(currentProjectId, data.html, prompt);
+          toast.success("New design generated!");
+        } else {
+          // Creating a brand new project
+          await createProject(data.html, prompt);
+          setIsCreatingNew(false);
+          toast.success("Website generated successfully!");
+        }
       } else {
         throw new Error("No HTML received from AI");
       }
@@ -188,9 +194,12 @@ const Index = () => {
 
         {showWorkspace ? (
           <Workspace 
-            code={currentProject.html_code} 
+            code={currentProject.html_code}
+            prompt={currentProject.prompt}
             onCodeChange={handleCodeChange}
             onNewProject={handleNewProject}
+            onRegenerateUI={handleGenerate}
+            isRegenerating={isGenerating}
           />
         ) : (
           <HeroSection 
