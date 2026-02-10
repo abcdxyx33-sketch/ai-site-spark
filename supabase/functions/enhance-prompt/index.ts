@@ -76,16 +76,17 @@ serve(async (req) => {
       );
     }
 
-    const systemPrompt = `You are an expert website design consultant. Your job is to take a user's simple website idea and enhance it into a detailed, professional prompt that will produce a stunning website.
+    const systemPrompt = `You are an expert website design consultant. Your job is to take a user's simple website idea and enhance it into a detailed, professional prompt that will produce a stunning, visually captivating website.
 
 RULES:
 - Return ONLY the enhanced prompt text, no explanations or markdown formatting
 - Keep the user's original intent and theme
-- Add specific details about: layout structure, color palette suggestions, typography, sections to include, visual effects, and responsive design considerations
-- Suggest modern design patterns (hero sections, card grids, testimonials, CTAs, etc.)
-- Keep the enhanced prompt concise but detailed (under 500 words)
-- Make it sound natural, not like a checklist
-- Do NOT include technical instructions about HTML/CSS - focus on the design vision`;
+- Your response MUST be under 1500 characters total — be concise and impactful
+- Focus on: layout structure, a specific bold color palette (hex codes), typography pairing, 3-5 key sections, and one signature visual effect
+- Suggest modern, attention-grabbing patterns (hero with gradient overlay, bento grids, animated stats, floating cards, parallax, glassmorphism)
+- Emphasize what makes users STAY: clear visual hierarchy, compelling CTAs, smooth micro-interactions, social proof sections
+- Make it sound like a creative brief, not a checklist
+- Do NOT include technical instructions about HTML/CSS — focus purely on the design vision and user experience`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -99,7 +100,7 @@ RULES:
           { role: "system", content: systemPrompt },
           { role: "user", content: `Enhance this website prompt with more design details and structure:\n\n"${trimmedPrompt}"` },
         ],
-        max_tokens: 1000,
+        max_tokens: 600,
         temperature: 0.8,
       }),
     });
