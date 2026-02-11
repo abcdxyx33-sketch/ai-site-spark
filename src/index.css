@@ -54,14 +54,14 @@
   }
 
   .dark {
-    --background: 240 20% 4%;
-    --foreground: 0 0% 98%;
+    --background: 240 25% 3%;
+    --foreground: 0 0% 96%;
 
-    --card: 240 20% 8%;
-    --card-foreground: 0 0% 98%;
+    --card: 240 25% 6%;
+    --card-foreground: 0 0% 96%;
 
-    --popover: 240 20% 7%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 240 25% 5%;
+    --popover-foreground: 0 0% 96%;
 
     --primary: 215 100% 65%;
     --primary-foreground: 0 0% 100%;
@@ -69,8 +69,8 @@
     --secondary: 270 100% 72%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 240 15% 14%;
-    --muted-foreground: 240 8% 60%;
+    --muted: 240 20% 11%;
+    --muted-foreground: 240 10% 55%;
 
     --accent: 340 100% 65%;
     --accent-foreground: 0 0% 100%;
@@ -78,28 +78,30 @@
     --destructive: 0 80% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 15% 16%;
-    --input: 240 15% 16%;
+    --border: 240 20% 12%;
+    --input: 240 20% 12%;
     --ring: 270 100% 72%;
 
-    /* Vibrant gradient colors for dark mode — cranked up */
-    --gradient-blue: 210 100% 65%;
-    --gradient-purple: 270 100% 74%;
-    --gradient-pink: 335 100% 68%;
-    --gradient-cyan: 185 100% 55%;
-    --gradient-amber: 35 100% 60%;
+    /* Vibrant gradient colors for dark mode — neon-level */
+    --gradient-blue: 210 100% 62%;
+    --gradient-purple: 270 100% 72%;
+    --gradient-pink: 335 100% 66%;
+    --gradient-cyan: 185 100% 58%;
+    --gradient-amber: 35 100% 62%;
+    --gradient-emerald: 160 100% 45%;
+    --gradient-rose: 350 100% 60%;
 
-    /* Dark cream card */
-    --cream: 240 20% 10%;
-    --cream-dark: 240 15% 20%;
+    /* Dark cream card — deeper */
+    --cream: 240 25% 7%;
+    --cream-dark: 240 20% 15%;
 
-    --sidebar-background: 240 20% 6%;
-    --sidebar-foreground: 0 0% 98%;
+    --sidebar-background: 240 25% 4%;
+    --sidebar-foreground: 0 0% 96%;
     --sidebar-primary: 270 100% 72%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 15% 14%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 240 15% 16%;
+    --sidebar-accent: 240 20% 11%;
+    --sidebar-accent-foreground: 0 0% 96%;
+    --sidebar-border: 240 20% 12%;
     --sidebar-ring: 270 100% 72%;
   }
 }
@@ -211,29 +213,40 @@
   }
 
   .dark .cream-card {
-    @apply bg-[hsl(240,20%,10%)] border border-[hsl(270,50%,30%,0.3)];
+    @apply bg-[hsl(240,25%,7%)] border border-[hsl(270,60%,35%,0.25)];
     box-shadow: 
-      0 0 0 1px hsl(270 50% 30% / 0.2),
-      0 4px 24px -4px rgba(100, 60, 200, 0.15),
-      0 8px 32px -8px rgba(0, 0, 0, 0.3);
+      0 0 0 1px hsl(270 60% 35% / 0.15),
+      0 4px 30px -4px rgba(100, 40, 220, 0.2),
+      0 8px 40px -8px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 0 hsl(270 60% 50% / 0.05);
   }
 
   .dark .cream-card:hover {
     box-shadow: 
-      0 0 0 1px hsl(270 60% 40% / 0.3),
-      0 12px 40px -8px rgba(120, 80, 220, 0.2),
-      0 20px 50px -12px rgba(0, 0, 0, 0.4);
+      0 0 0 1px hsl(270 70% 45% / 0.3),
+      0 12px 50px -8px rgba(130, 60, 240, 0.25),
+      0 20px 60px -12px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 0 hsl(270 60% 50% / 0.1);
   }
 
   .dark .cream-card:focus-within {
     box-shadow: 
       0 0 0 2px hsl(var(--gradient-purple) / 0.5),
-      0 0 30px -5px hsl(var(--gradient-purple) / 0.2),
-      0 12px 40px -8px rgba(155, 111, 232, 0.25);
+      0 0 40px -5px hsl(var(--gradient-purple) / 0.25),
+      0 12px 50px -8px rgba(155, 90, 240, 0.3);
   }
 
   .dark .input-toolbar-btn:hover {
-    @apply bg-[hsl(270,30%,18%)];
+    @apply bg-[hsl(270,35%,15%)];
+  }
+
+  .dark .glass-card {
+    @apply bg-[hsl(240,25%,6%)]/80 border-[hsl(270,50%,30%,0.2)];
+  }
+
+  .dark .nav-blur {
+    background: hsl(240 25% 3% / 0.85);
+    border-color: hsl(270 40% 25% / 0.15);
   }
 }
 

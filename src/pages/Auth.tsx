@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sparkles, Loader2, Mail, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { Sparkles, Loader2, Mail, Lock, Eye, EyeOff, ArrowLeft, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
 import BackgroundGradient from "@/components/BackgroundGradient";
+import TurnstileCaptcha from "@/components/TurnstileCaptcha";
 import { z } from "zod";
 
 const emailSchema = z.string().email("Please enter a valid email address");
@@ -24,6 +25,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -105,6 +107,18 @@ const Auth = () => {
     }
   };
 
+  const verifyCaptcha = async (token: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase.functions.invoke("verify-captcha", {
+        body: { token },
+      });
+      if (error) return false;
+      return data?.success === true;
+    } catch {
+      return false;
+    }
+  };
+
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -113,9 +127,23 @@ const Auth = () => {
     }
     
     if (!validateForm()) return;
+
+    if (!captchaToken) {
+      toast.error("Please complete the CAPTCHA verification.");
+      return;
+    }
     
     setIsLoading(true);
     try {
+      // Verify CAPTCHA server-side
+      const captchaValid = await verifyCaptcha(captchaToken);
+      if (!captchaValid) {
+        toast.error("CAPTCHA verification failed. Please try again.");
+        setCaptchaToken(null);
+        setIsLoading(false);
+        return;
+      }
+
       if (mode === "signup") {
         const { error } = await supabase.auth.signUp({
           email,
@@ -188,7 +216,10 @@ const Auth = () => {
       
       <div className="relative z-10 w-full max-w-md">
         <div 
-          className="bg-card/80 backdrop-blur-xl border border-border/50 rounded-2xl p-8 shadow-2xl animate-fade-in-up"
+          className="bg-card/70 backdrop-blur-2xl border border-border/30 rounded-2xl p-8 shadow-2xl animate-fade-in-up"
+          style={{
+            boxShadow: '0 0 80px -20px hsl(var(--gradient-purple) / 0.15), 0 25px 50px -12px rgba(0,0,0,0.4)',
+          }}
         >
           {/* Back button for forgot password */}
           {mode === "forgot" && (
@@ -203,7 +234,9 @@ const Auth = () => {
 
           {/* Logo */}
           <div className="flex flex-col items-center mb-6">
-            <div className="w-16 h-16 rounded-2xl gradient-bg flex items-center justify-center mb-4 shadow-glow">
+            <div className="w-16 h-16 rounded-2xl gradient-bg flex items-center justify-center mb-4"
+              style={{ boxShadow: '0 0 30px hsl(var(--gradient-purple) / 0.4)' }}
+            >
               <Sparkles className="w-8 h-8 text-white" strokeWidth={1.5} />
             </div>
             <h1 className="text-2xl font-bold text-foreground">{getTitle()}</h1>
@@ -279,9 +312,25 @@ const Auth = () => {
               </div>
             )}
 
+            {/* Turnstile CAPTCHA — only for sign in and sign up */}
+            {mode !== "forgot" && (
+              <div className="space-y-1">
+                <TurnstileCaptcha
+                  onVerify={(token) => setCaptchaToken(token)}
+                  onExpire={() => setCaptchaToken(null)}
+                />
+                {captchaToken && (
+                  <div className="flex items-center justify-center gap-1.5 text-xs text-primary">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    Verified
+                  </div>
+                )}
+              </div>
+            )}
+
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || (mode !== "forgot" && !captchaToken)}
               className="w-full h-11 gap-2 rounded-xl"
             >
               {isLoading ? (
@@ -299,7 +348,7 @@ const Auth = () => {
                   <div className="w-full border-t border-border" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                  <span className="bg-card/80 px-2 text-muted-foreground">Or continue with</span>
                 </div>
               </div>
 
@@ -344,6 +393,7 @@ const Auth = () => {
                   onClick={() => {
                     setMode(mode === "signup" ? "signin" : "signup");
                     setErrors({});
+                    setCaptchaToken(null);
                   }}
                   className="text-primary hover:underline font-medium"
                   disabled={isLoading}
