@@ -75,26 +75,45 @@ const BackgroundGradient = () => {
         }}
       />
 
-      {/* Dark mode extra orbs — Cyan & Amber accents */}
+      {/* Dark mode extra orbs — Cyan accent */}
       <div 
         className="hidden dark:block absolute top-[10%] right-[15%] w-[400px] h-[400px] animate-orb-2"
         style={{
-          background: 'radial-gradient(circle, hsl(185 100% 55% / 0.25) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, hsl(185 100% 55% / 0.3) 0%, transparent 70%)',
           filter: 'blur(80px)',
           animationDuration: '45s',
         }}
       />
+      {/* Dark mode — Amber glow */}
       <div 
         className="hidden dark:block absolute bottom-[15%] right-[10%] w-[350px] h-[350px] animate-orb-3"
         style={{
-          background: 'radial-gradient(circle, hsl(35 100% 55% / 0.2) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, hsl(35 100% 55% / 0.25) 0%, transparent 70%)',
           filter: 'blur(70px)',
           animationDuration: '38s',
         }}
       />
+      {/* Dark mode — Emerald accent */}
+      <div 
+        className="hidden dark:block absolute top-[60%] left-[10%] w-[300px] h-[300px] animate-orb-1"
+        style={{
+          background: 'radial-gradient(circle, hsl(160 100% 45% / 0.2) 0%, transparent 70%)',
+          filter: 'blur(90px)',
+          animationDuration: '55s',
+        }}
+      />
+      {/* Dark mode — Rose accent */}
+      <div 
+        className="hidden dark:block absolute top-[5%] left-[50%] w-[250px] h-[250px] animate-orb-2"
+        style={{
+          background: 'radial-gradient(circle, hsl(350 100% 60% / 0.2) 0%, transparent 70%)',
+          filter: 'blur(60px)',
+          animationDuration: '42s',
+        }}
+      />
 
-      {/* White overlay for softening — lighter in light mode, darker in dark */}
-      <div className="absolute inset-0 bg-white/60 dark:bg-[hsl(240,20%,4%)]/40" />
+      {/* White overlay for softening — lighter in light mode, ultra-dark in dark */}
+      <div className="absolute inset-0 bg-white/60 dark:bg-[hsl(240,25%,3%)]/50" />
     </div>
   );
 };
